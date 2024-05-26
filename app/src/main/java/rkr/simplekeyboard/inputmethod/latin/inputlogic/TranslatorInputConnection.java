@@ -1,6 +1,11 @@
 package rkr.simplekeyboard.inputmethod.latin.inputlogic;
 
+import android.graphics.Color;
 import android.inputmethodservice.InputMethodService;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.style.BackgroundColorSpan;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.TextView;
@@ -14,6 +19,9 @@ import rkr.simplekeyboard.inputmethod.latin.utils.DelayedTaskQueue;
 // Translator act as the proxy to RichConnection, it'll decided weather to hold continue
 // commit to the connection or stop it here.
 public class TranslatorInputConnection extends RichInputConnection{
+
+    private final boolean DEBUG = false;
+
     private String mOriginalString = "";
 
     private String mTranslationString = "";
@@ -40,10 +48,22 @@ public class TranslatorInputConnection extends RichInputConnection{
         mTranslator = translator;
     }
 
+    private void setOriginalStringViewText(String text){
+        mOriginalString = text;
+        // add the text space in the binning and the end to increase
+        // readability
+        if (!text.isEmpty()){
+            text = " "+text+" ";
+        }
+        SpannableString spannableString = new SpannableString(text);
+        spannableString.setSpan(new BackgroundColorSpan(Color.WHITE),
+                0, text.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        mOriginalStringView.setText(spannableString);
+    }
+
     // start the new input
     public void setInput(){
-        mOriginalString = "";
-        mOriginalStringView.setText("");
+        setOriginalStringViewText("");
         queueTrans(mOriginalString);
     }
 
@@ -70,15 +90,13 @@ public class TranslatorInputConnection extends RichInputConnection{
 
     // commitText will write the text into original_text view and wait for the translation
     public void commitText(final CharSequence text, final int newCursorPosition) {
-        mOriginalString += text;
-        mOriginalStringView.setText(mOriginalString);
+        setOriginalStringViewText(mOriginalString+text);
         queueTrans(mOriginalString);
     }
 
     private void delEvent(final KeyEvent keyEvent){
         if (!mOriginalString.isEmpty()){
-            mOriginalString = mOriginalString.substring(0,mOriginalString.length()-1);
-            mOriginalStringView.setText(mOriginalString);
+            setOriginalStringViewText(mOriginalString.substring(0,mOriginalString.length()-1));
             queueTrans(mOriginalString);
         }else {
             // delete from the connection
@@ -111,7 +129,12 @@ public class TranslatorInputConnection extends RichInputConnection{
     }
 
     private void queueTrans(String text){
+        long taskAddedTime = System.currentTimeMillis();
         mTaskQueue.addTask(() -> {
+            if (DEBUG){
+                long taskStartedTime = System.currentTimeMillis();
+                Log.d(this.getClass().toString(), "text: "+text+" Time elapsed since task added: " + (taskStartedTime - taskAddedTime) + " ms");
+            }
             mTranslationString = mTranslator.translate(text);
             mKeyboardView.onDrawKeyTransOut(mTranslationString);
         });
@@ -123,9 +146,8 @@ public class TranslatorInputConnection extends RichInputConnection{
         mConnection.beginBatchEdit();
         mConnection.commitText(mTranslationString,1);
         mConnection.endBatchEdit();
-        mOriginalString = "";
+        setOriginalStringViewText("");
         mTranslationString = "";
-        mOriginalStringView.setText("");
         mKeyboardView.onDrawKeyTransOut("");
     }
 }

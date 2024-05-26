@@ -12,7 +12,7 @@ public class DelayedTaskQueue {
     private final Queue<Runnable> taskQueue;
     private final ScheduledExecutorService scheduler;
     private ScheduledFuture<?> scheduledTask;
-    private static final int DELAY_MS = 1000;
+    private static final int DELAY_MS = 1500;
 
     public DelayedTaskQueue() {
         taskQueue = new ConcurrentLinkedQueue<>();
