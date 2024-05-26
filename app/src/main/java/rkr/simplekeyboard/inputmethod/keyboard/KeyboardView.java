@@ -498,8 +498,7 @@ public class KeyboardView extends View {
     public void onDrawKeyTransOut(String label){
         Key key = mKeyboard.getKey(Constants.CODE_TRANS_OUT);
         key.setLabel(label);
-        invalidateAllKeys();
-        setKeyboard(mKeyboard);
+        invalidateKey(key);
     }
 
     /**
