@@ -1,5 +1,6 @@
 package rkr.simplekeyboard.inputmethod.latin;
 
+import com.google.gson.Gson;
 import com.theokanning.openai.completion.chat.ChatCompletionChoice;
 import com.theokanning.openai.completion.chat.ChatCompletionRequest;
 import com.theokanning.openai.completion.chat.ChatMessage;
@@ -8,6 +9,8 @@ import com.theokanning.openai.service.OpenAiService;
 import java.util.ArrayList;
 import java.util.List;
 
+import rkr.simplekeyboard.inputmethod.latin.settings.TranslationItem;
+
 public class GPTTranslator {
     private final String mErrUnableToTrans = "500";
 
@@ -15,27 +18,42 @@ public class GPTTranslator {
 
     private LatinIME mLatinIME;
 
-    private final String mDefaultSysPrompt = "Translate the following sentence to Indonesian with a casual tone." +
-            "\n" +
-            "example: \n" +
-            "\n" +
-            "user: , system: 500\n" +
-            "\n" +
-            "user: h, system: 500\n" +
-            "\n" +
-            "user: this is money, system: ini uang\n" +
-            "\n" +
-            "user: I'm eating at the cafe with your friend, system: gw lg makan di kafe bareng temen lo";
+    private final String mDefaultSysPrompt = "Translate the following sentence to Indonesian with a casual tone.\n";
 
     public GPTTranslator(final LatinIME latinIME) {
         mLatinIME = latinIME;
     }
 
     private List<ChatMessage> generateChatMessages(String originalString) {
+        String translationList = generateTranslationList();
+
+        String systemPrompt = mPromptUnableToTranslate +mDefaultSysPrompt;
+
+        systemPrompt += "\nbelow is the example of the translation:\n"+translationList+"\n";
+
+        systemPrompt += "Text to translate:\n"+originalString;
+
+
         List<ChatMessage> chatMessages = new ArrayList<>();
-        chatMessages.add(new ChatMessage("system", mPromptUnableToTranslate +mDefaultSysPrompt));
-        chatMessages.add(new ChatMessage("user", originalString));
+        chatMessages.add(new ChatMessage("system", "You are the bot fot translator"));
+        chatMessages.add(new ChatMessage("user", systemPrompt));
         return chatMessages;
+    }
+
+    // return the translation list in format
+    // "original"->"translation"
+    private String generateTranslationList(){
+
+        StringBuilder stringBuilder = new StringBuilder();
+        List<TranslationItem> list =  mLatinIME.mSettings.getCurrent().mOpenAITranslationList;
+        for (int i = 0; i < list.size(); i++) {
+            stringBuilder.append(list.get(i).getOriginalText());
+            stringBuilder.append(" -> ");
+            stringBuilder.append(list.get(i).getTranslatedText());
+            stringBuilder.append("\n");
+        }
+
+        return stringBuilder.toString();
     }
 
     private List<ChatCompletionChoice> getCompletionChoices(ChatCompletionRequest chatCompletionRequest) {

@@ -31,4 +31,9 @@
         latin:maxValue="100"
         latin:minValue="0"
         latin:defPref="true"/>
+
+    <rkr.simplekeyboard.inputmethod.latin.settings.TranslatorPromptSettingsFragment
+        android:key="pref_translation_list"
+        android:title="Prompt Translation List"
+        android:summary="Manage original texts and their translations" />
 </PreferenceScreen>

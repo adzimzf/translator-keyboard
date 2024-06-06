@@ -23,6 +23,12 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.util.Log;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
 import rkr.simplekeyboard.inputmethod.R;
@@ -57,6 +63,8 @@ public final class Settings implements SharedPreferences.OnSharedPreferenceChang
     public static final String PREF_OPENAI_TEMPERATURE = "pref_open_ai_temperature";
     public static final String PREF_OPENAI_MODEL = "pref_open_ai_model";
     public static final String PREF_OPENAI_API_KEY = "pref_open_ai_api_key";
+
+    public static final String PREF_PROMPT_TRANSLATION_LIST = "pref_open_ai_prompt_translation_list";
 
     private static final float UNDEFINED_PREFERENCE_VALUE_FLOAT = -1.0f;
     private static final int UNDEFINED_PREFERENCE_VALUE_INT = -1;
@@ -208,6 +216,16 @@ public final class Settings implements SharedPreferences.OnSharedPreferenceChang
 
     public static float readOpenAITemperature(final SharedPreferences prefs) {
         return prefs.getInt(PREF_OPENAI_TEMPERATURE, 50) / 100f;
+    }
+
+    public static List<TranslationItem> readOpenAITranslationList(final SharedPreferences prefs){
+        String prefsString = prefs.getString(PREF_PROMPT_TRANSLATION_LIST, "");
+        if (prefsString.isEmpty()){
+            return new ArrayList<>();
+        }
+        Gson gson = new Gson();
+        Type translationItemListType = new TypeToken<List<TranslationItem>>(){}.getType();
+       return gson.fromJson(prefsString, translationItemListType);
     }
 
     public static String readOpenAIModel(final SharedPreferences prefs) {

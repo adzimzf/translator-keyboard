@@ -21,6 +21,8 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.view.inputmethod.EditorInfo;
 
+import java.util.List;
+
 import rkr.simplekeyboard.inputmethod.R;
 import rkr.simplekeyboard.inputmethod.latin.InputAttributes;
 
@@ -63,6 +65,8 @@ public class SettingsValues {
     public final String mOpenAIModel;
     public final float mOpenAITemperature;
 
+    public final List<TranslationItem> mOpenAITranslationList;
+
     public SettingsValues(final SharedPreferences prefs, final Resources res,
             final InputAttributes inputAttributes) {
         // Get the resources
@@ -95,6 +99,7 @@ public class SettingsValues {
         mOpenAIAPIKey = Settings.readOpenAIAPIKey(prefs);
         mOpenAIModel = Settings.readOpenAIModel(prefs);
         mOpenAITemperature = Settings.readOpenAITemperature(prefs);
+        mOpenAITranslationList = Settings.readOpenAITranslationList(prefs);
     }
 
     public boolean isWordSeparator(final int code) {

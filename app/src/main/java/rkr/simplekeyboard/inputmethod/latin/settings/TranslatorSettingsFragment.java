@@ -27,6 +27,7 @@ public class TranslatorSettingsFragment extends SubScreenFragment {
             return;
         }
         final SharedPreferences prefs = getSharedPreferences();
+
         pref.setInterface(new SeekBarDialogPreference.ValueProxy() {
             @Override
             public void writeValue(final int value, final String key) {
