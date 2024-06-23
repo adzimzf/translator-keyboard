@@ -16,6 +16,7 @@
 
 package rkr.simplekeyboard.inputmethod.latin.common;
 
+import android.graphics.Paint;
 import android.text.TextUtils;
 
 import java.util.ArrayList;
@@ -255,5 +256,23 @@ public final class StringUtils {
         final String titleCaseLabel = toTitleCaseOfKeyLabel(label, locale);
         return codePointCount(titleCaseLabel) == 1
                 ? titleCaseLabel.codePointAt(0) : Constants.CODE_UNSPECIFIED;
+    }
+
+    public static String[] wrapText(String text, Paint paint, float maxWidth) {
+        String[] words = text.split(" ");
+        StringBuilder wrappedText = new StringBuilder();
+        StringBuilder line = new StringBuilder();
+
+        for (String word : words) {
+            if (paint.measureText(line + word) <= maxWidth) {
+                line.append(word).append(" ");
+            } else {
+                wrappedText.append(line).append("\n");
+                line = new StringBuilder(word).append(" ");
+            }
+        }
+        wrappedText.append(line);
+
+        return wrappedText.toString().split("\n");
     }
 }

@@ -88,6 +88,7 @@ public class Key implements Comparable<Key> {
     private static final int LABEL_FLAGS_FOLLOW_FUNCTIONAL_TEXT_COLOR = 0x80000;
     private static final int LABEL_FLAGS_DISABLE_HINT_LABEL = 0x40000000;
     private static final int LABEL_FLAGS_DISABLE_ADDITIONAL_MORE_KEYS = 0x80000000;
+    private static final int LABEL_FLAGS_TRANS_OUT = 311;
 
     /** Icon to display instead of a label. Icon takes precedence over a label */
     private final int mIconId;
@@ -569,6 +570,10 @@ public class Key implements Comparable<Key> {
     }
 
     public final int selectTextSize(final KeyDrawParams params) {
+        if (mLabelFlags ==  LABEL_FLAGS_TRANS_OUT){
+            return 30; // hardcoded
+        }
+
         switch (mLabelFlags & LABEL_FLAGS_FOLLOW_KEY_TEXT_RATIO_MASK) {
         case LABEL_FLAGS_FOLLOW_KEY_LETTER_RATIO:
             return params.mLetterSize;

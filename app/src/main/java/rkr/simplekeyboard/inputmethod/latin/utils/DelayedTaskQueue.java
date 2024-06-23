@@ -2,6 +2,7 @@ package rkr.simplekeyboard.inputmethod.latin.utils;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -12,7 +13,7 @@ public class DelayedTaskQueue {
     private final Queue<Runnable> taskQueue;
     private final ScheduledExecutorService scheduler;
     private ScheduledFuture<?> scheduledTask;
-    private static final int DELAY_MS = 1500;
+    private static final int DELAY_MS = 800;
 
     public DelayedTaskQueue() {
         taskQueue = new ConcurrentLinkedQueue<>();
@@ -29,6 +30,10 @@ public class DelayedTaskQueue {
         // Add the new task and schedule it
         taskQueue.add(task);
         scheduledTask = scheduler.schedule(this::executeNextTask, DELAY_MS, TimeUnit.MILLISECONDS);
+    }
+
+    public synchronized void addTaskWithoutDelay(Runnable task) {
+         Executors.newSingleThreadScheduledExecutor().execute(task);
     }
 
     private void executeNextTask() {

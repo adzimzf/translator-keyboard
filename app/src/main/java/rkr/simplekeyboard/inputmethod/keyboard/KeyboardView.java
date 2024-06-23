@@ -39,6 +39,7 @@ import rkr.simplekeyboard.inputmethod.compat.PreferenceManagerCompat;
 import rkr.simplekeyboard.inputmethod.keyboard.internal.KeyDrawParams;
 import rkr.simplekeyboard.inputmethod.keyboard.internal.KeyVisualAttributes;
 import rkr.simplekeyboard.inputmethod.latin.common.Constants;
+import rkr.simplekeyboard.inputmethod.latin.common.StringUtils;
 import rkr.simplekeyboard.inputmethod.latin.settings.Settings;
 import rkr.simplekeyboard.inputmethod.latin.utils.TypefaceUtils;
 
@@ -394,7 +395,20 @@ public class KeyboardView extends View {
             }
 
             blendAlpha(paint, params.mAnimAlpha);
-            canvas.drawText(label, 0, label.length(), labelX, labelBaseline, paint);
+
+            // if the label is trans out it should wrapped
+            if (key.getCode() == Constants.CODE_TRANS_OUT){
+                String[] lines = StringUtils.wrapText(label,paint,keyWidth);
+                float textSize = paint.getTextSize();
+                float lineHeight = textSize * 1.2f; // Adjust line height as needed
+                float startY = centerY - (lineHeight * (lines.length - 1)) / 2;
+                for (int i = 0; i < lines.length; i++) {
+                    canvas.drawText(lines[i], labelX, startY + (i * lineHeight), paint);
+                }
+            }else {
+                canvas.drawText(label, 0, label.length(), labelX, labelBaseline, paint);
+            }
+
             // Turn off drop shadow and reset x-scale.
             paint.clearShadowLayer();
             paint.setTextScaleX(1.0f);
@@ -499,6 +513,14 @@ public class KeyboardView extends View {
         Key key = mKeyboard.getKey(Constants.CODE_TRANS_OUT);
         key.setLabel(label);
         invalidateKey(key);
+    }
+
+    public void onDrawKeyTransToggle(String label){
+        Key key = mKeyboard.getKey(Constants.CODE_TRANS_TOGGLE);
+        if (key != null){
+            key.setLabel(label);
+            invalidateKey(key);
+        }
     }
 
     /**

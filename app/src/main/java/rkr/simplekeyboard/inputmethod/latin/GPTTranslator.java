@@ -14,7 +14,7 @@ import rkr.simplekeyboard.inputmethod.latin.settings.TranslationItem;
 public class GPTTranslator {
     private final String mErrUnableToTrans = "500";
 
-    private final String mPromptUnableToTranslate = "If the model is unable to translate, return the code 500.\n";
+    private final String mPromptUnableToTranslate = "If the model is unable to translate, return an empty string.\n";
 
     private LatinIME mLatinIME;
 
@@ -84,7 +84,7 @@ public class GPTTranslator {
                 return choice.getMessage().getContent();
             }
         }catch (Exception e){
-            return "Exception:"+e.getMessage();
+            return "Exception: "+e.getMessage();
         }
         return "";
     }

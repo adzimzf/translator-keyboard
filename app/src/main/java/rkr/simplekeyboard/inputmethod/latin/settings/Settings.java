@@ -61,6 +61,8 @@ public final class Settings implements SharedPreferences.OnSharedPreferenceChang
     public static final String PREF_DELETE_SWIPE = "pref_delete_swipe";
     public static final String PREF_MATCHING_NAVBAR_COLOR = "pref_matching_navbar_color";
     public static final String PREF_OPENAI_TEMPERATURE = "pref_open_ai_temperature";
+
+    public static final String PREF_USE_TRANSLATION = "pref_use_translation";
     public static final String PREF_OPENAI_MODEL = "pref_open_ai_model";
     public static final String PREF_OPENAI_API_KEY = "pref_open_ai_api_key";
 
@@ -216,6 +218,14 @@ public final class Settings implements SharedPreferences.OnSharedPreferenceChang
 
     public static float readOpenAITemperature(final SharedPreferences prefs) {
         return prefs.getInt(PREF_OPENAI_TEMPERATURE, 50) / 100f;
+    }
+
+    public static boolean readUseTranslation(final SharedPreferences prefs) {
+        return prefs.getBoolean(PREF_USE_TRANSLATION,true);
+    }
+
+    public void writeUseTranslation(final SharedPreferences prefs, boolean useTranslation){
+        prefs.edit().putBoolean(PREF_USE_TRANSLATION,useTranslation).apply();
     }
 
     public static List<TranslationItem> readOpenAITranslationList(final SharedPreferences prefs){

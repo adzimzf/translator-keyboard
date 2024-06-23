@@ -16,8 +16,10 @@
 
 package rkr.simplekeyboard.inputmethod.latin.inputlogic;
 
+import android.content.SharedPreferences;
 import android.os.SystemClock;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.inputmethod.EditorInfo;
@@ -25,8 +27,11 @@ import android.widget.TextView;
 
 import java.util.TreeSet;
 
+import rkr.simplekeyboard.inputmethod.compat.PreferenceManagerCompat;
 import rkr.simplekeyboard.inputmethod.event.Event;
 import rkr.simplekeyboard.inputmethod.event.InputTransaction;
+import rkr.simplekeyboard.inputmethod.keyboard.KeyboardId;
+import rkr.simplekeyboard.inputmethod.keyboard.KeyboardView;
 import rkr.simplekeyboard.inputmethod.latin.GPTTranslator;
 import rkr.simplekeyboard.inputmethod.latin.LatinIME;
 import rkr.simplekeyboard.inputmethod.latin.RichInputConnection;
@@ -45,10 +50,18 @@ public final class InputLogic {
     final LatinIME mLatinIME;
 
     // This has package visibility so it can be accessed from InputLogicHandler.
-    public final TranslatorInputConnection mConnection;
+    public  RichInputConnection mConnection;
+    private final RichInputConnection mRichInputConnection;
+    public final TranslatorInputConnection mTranslatorInputConnection;
     private final RecapitalizeStatus mRecapitalizeStatus = new RecapitalizeStatus();
 
+    private boolean mUseTranslation = true;
+
+    private KeyboardView mKeyboardView;
+
     public final TreeSet<Long> mCurrentlyPressedHardwareKeys = new TreeSet<>();
+
+    private SharedPreferences mPrefs;
 
     /**
      * Create a new instance of the input logic.
@@ -57,7 +70,9 @@ public final class InputLogic {
      */
     public InputLogic(final LatinIME latinIME) {
         mLatinIME = latinIME;
-        mConnection = new TranslatorInputConnection(new RichInputConnection(latinIME),new GPTTranslator(latinIME));
+        mRichInputConnection = new RichInputConnection(latinIME);
+        mTranslatorInputConnection = new TranslatorInputConnection(mRichInputConnection,new GPTTranslator(latinIME));
+        mConnection = mTranslatorInputConnection;
     }
 
     /**
@@ -66,13 +81,39 @@ public final class InputLogic {
      * Call this when input starts or restarts in some editor (typically, in onStartInputView).
      */
     public void startInput() {
-        mConnection.setInput();
+        mTranslatorInputConnection.setInput();
         mRecapitalizeStatus.disable(); // Do not perform recapitalize until the cursor is moved once
         mCurrentlyPressedHardwareKeys.clear();
+        mPrefs = PreferenceManagerCompat.getDeviceSharedPreferences(mLatinIME.getBaseContext());
     }
 
     public void setStringView(TextView originalStringView){
-        mConnection.setOriginalStringView(originalStringView);
+        mTranslatorInputConnection.setOriginalStringView(originalStringView);
+    }
+
+    public void setTranslationButton(){
+        KeyboardId keyboardId = mKeyboardView.getKeyboard().mId;
+        // the number will not show the translation
+        if (mLatinIME.mSettings.readUseTranslation(mPrefs) && keyboardId.mMode != KeyboardId.MODE_NUMBER){
+            mConnection = mTranslatorInputConnection;
+            mKeyboardView.onDrawKeyTransToggle("y");
+        }else {
+            mConnection = mTranslatorInputConnection.getConnection();
+            mKeyboardView.onDrawKeyTransToggle("n");
+        }
+    }
+
+    public void toggleTranslation(){
+        mLatinIME.mSettings.writeUseTranslation(mPrefs, !mLatinIME.mSettings.readUseTranslation(mPrefs));
+        setTranslationButton();
+    }
+
+    public void setKeyboardView(KeyboardView keyboardView){
+        if (mKeyboardView == null){
+            mKeyboardView = keyboardView;
+        }
+        setTranslationButton();
+        mTranslatorInputConnection.setKeyboardView(keyboardView);
     }
 
     /**
@@ -216,8 +257,12 @@ public final class InputLogic {
                 sendDownUpKeyEvent(KeyEvent.KEYCODE_ENTER, KeyEvent.META_SHIFT_ON);
                 // Shift + Enter is not supported in all devices
                 break;
+            case Constants.CODE_TRANS_TOGGLE:
+                // if long press switch the toggle to
+                mTranslatorInputConnection.translateWithoutQueue();
+                break;
             case Constants.CODE_TRANS_OUT:
-                mConnection.commitTransOut();
+                mTranslatorInputConnection.commitTransOut();
                 break;
             default:
                 throw new RuntimeException("Unknown key code : " + event.mKeyCode);
@@ -261,7 +306,7 @@ public final class InputLogic {
                     break;
 
                 case Constants.CODE_TRANS_OUT:
-                    mConnection.commitTransOut();
+                    mTranslatorInputConnection.commitTransOut();
                     break;
                 default:
                     handleNonSpecialCharacterEvent(event, inputTransaction);

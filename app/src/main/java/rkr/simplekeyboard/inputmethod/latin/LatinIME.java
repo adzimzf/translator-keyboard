@@ -86,7 +86,7 @@ public class LatinIME extends InputMethodService implements KeyboardActionListen
     private static final int PENDING_IMS_CALLBACK_DURATION_MILLIS = 800;
     static final long DELAY_DEALLOCATE_MEMORY_MILLIS = TimeUnit.SECONDS.toMillis(10);
 
-    final Settings mSettings;
+    public final Settings mSettings;
     private Locale mLocale;
     private int mOriginalNavBarColor = 0;
     private int mOriginalNavBarFlags = 0;
@@ -512,6 +512,7 @@ public class LatinIME extends InputMethodService implements KeyboardActionListen
                 // later call will be done in #retryResetCaches.
                 switcher.saveKeyboardState();
             }
+            mInputLogic.setKeyboardView(mKeyboardSwitcher.getMainKeyboardView());
         } else if (restarting) {
             // TODO: Come up with a more comprehensive way to reset the keyboard layout when
             // a keyboard layout set doesn't get reloaded in this method.
@@ -704,9 +705,17 @@ public class LatinIME extends InputMethodService implements KeyboardActionListen
         switch (requestCode) {
             case Constants.CUSTOM_CODE_SHOW_INPUT_METHOD_PICKER:
                 return showInputMethodPicker();
+            case Constants.CUSTOM_CODE_TOGGLE_ON_OF_TRANSLATION:
+                return toggleTranslation();
         }
         return false;
     }
+
+    private boolean toggleTranslation(){
+        mInputLogic.toggleTranslation();
+        return true;
+    }
+
 
     private boolean showInputMethodPicker() {
         if (isShowingOptionDialog()) {
@@ -923,8 +932,8 @@ public class LatinIME extends InputMethodService implements KeyboardActionListen
         // this is might decrease the performance, but I still don't know
         // where's the keyboard initialized.
         Keyboard keyboard = mKeyboardSwitcher.getKeyboard();
-        mInputLogic.mConnection.setTransOutKey(keyboard.getKey(Constants.CODE_TRANS_OUT));
-        mInputLogic.mConnection.setKeyboardView(mKeyboardSwitcher.getMainKeyboardView());
+        mInputLogic.mTranslatorInputConnection.setTransOutKey(keyboard.getKey(Constants.CODE_TRANS_OUT));
+//        mInputLogic.setKeyboardView(mKeyboardSwitcher.getMainKeyboardView());
     }
 
     // receive ringer mode change.

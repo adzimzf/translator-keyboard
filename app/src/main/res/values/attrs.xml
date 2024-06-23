@@ -230,6 +230,8 @@
             <flag name="disableKeyHintLabel" value="0x40000000" />
             <!-- If true, disable additionalMoreKeys. -->
             <flag name="disableAdditionalMoreKeys" value="0x80000000" />
+
+            <flag name="transOutLabel" value="0x137" />
         </attr>
         <!-- The key style to specify a set of key attributes defined by <key_style/> -->
         <attr name="keyStyle" format="string" />

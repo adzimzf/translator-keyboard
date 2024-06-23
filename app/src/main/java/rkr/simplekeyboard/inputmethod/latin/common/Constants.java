@@ -66,6 +66,8 @@ public final class Constants {
     // The code to show input method picker.
     public static final int CUSTOM_CODE_SHOW_INPUT_METHOD_PICKER = 1;
 
+    public static final int CUSTOM_CODE_TOGGLE_ON_OF_TRANSLATION = 2;
+
     /**
      * Some common keys code. Must be positive.
      */
@@ -104,6 +106,8 @@ public final class Constants {
     // Code for translation output button.
     public static final int CODE_TRANS_OUT = -14;
 
+    public static final int CODE_TRANS_TOGGLE = -15;
+
     public static boolean isLetterCode(final int code) {
         return code >= CODE_SPACE;
     }
@@ -125,6 +129,7 @@ public final class Constants {
         case CODE_ENTER: return "enter";
         case CODE_SPACE: return "space";
         case CODE_TRANS_OUT: return "transOut";
+            case CODE_TRANS_TOGGLE: return "transToggle";
         default:
             if (code < CODE_SPACE) return String.format("\\u%02X", code);
             if (code < 0x100) return String.format("%c", code);

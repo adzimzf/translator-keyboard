@@ -747,15 +747,27 @@ public final class PointerTracker implements PointerTrackerQueue.Element {
             sListener.onReleaseKey(moreKeyCode, false /* withSliding */);
             return;
         }
+
         final int code = key.getCode();
-        if (code == Constants.CODE_SPACE || code == Constants.CODE_LANGUAGE_SWITCH) {
-            // Long pressing the space key invokes IME switcher dialog.
-            if (sListener.onCustomRequest(Constants.CUSTOM_CODE_SHOW_INPUT_METHOD_PICKER)) {
-                cancelKeyTracking();
-                sListener.onReleaseKey(code, false /* withSliding */);
-                return;
-            }
+        switch (code){
+            case Constants.CODE_SPACE:
+            case Constants.CODE_LANGUAGE_SWITCH:
+                // Long pressing the space key invokes IME switcher dialog.
+                if (sListener.onCustomRequest(Constants.CUSTOM_CODE_SHOW_INPUT_METHOD_PICKER)) {
+                    cancelKeyTracking();
+                    sListener.onReleaseKey(code, false /* withSliding */);
+                    return;
+                }
+                break;
+            case Constants.CODE_TRANS_TOGGLE:
+                if (sListener.onCustomRequest(Constants.CUSTOM_CODE_TOGGLE_ON_OF_TRANSLATION)) {
+                    cancelKeyTracking();
+                    sListener.onReleaseKey(code, false /* withSliding */);
+                    return;
+                }
+                break;
         }
+
 
         setReleasedKeyGraphics(key, false /* withAnimation */);
         final MoreKeysPanel moreKeysPanel = sDrawingProxy.showMoreKeysKeyboard(key, this);

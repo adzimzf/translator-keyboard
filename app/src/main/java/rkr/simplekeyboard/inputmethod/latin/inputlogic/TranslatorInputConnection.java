@@ -61,6 +61,11 @@ public class TranslatorInputConnection extends RichInputConnection{
         mOriginalStringView.setText(spannableString);
     }
 
+
+    public RichInputConnection getConnection(){
+        return mConnection;
+    }
+
     // start the new input
     public void setInput(){
         setOriginalStringViewText("");
@@ -121,6 +126,7 @@ public class TranslatorInputConnection extends RichInputConnection{
             case KeyEvent.KEYCODE_5:
             case KeyEvent.KEYCODE_6:
             case KeyEvent.KEYCODE_7:
+            case KeyEvent.KEYCODE_8:
             case KeyEvent.KEYCODE_9:
             case KeyEvent.KEYCODE_0:
                 commitText(String.valueOf(keyEvent.getDisplayLabel()),1);
@@ -136,6 +142,13 @@ public class TranslatorInputConnection extends RichInputConnection{
                 Log.d(this.getClass().toString(), "text: "+text+" Time elapsed since task added: " + (taskStartedTime - taskAddedTime) + " ms");
             }
             mTranslationString = mTranslator.translate(text);
+            mKeyboardView.onDrawKeyTransOut(mTranslationString);
+        });
+    }
+
+    public void translateWithoutQueue(){
+        mTaskQueue.addTaskWithoutDelay(()->{
+            mTranslationString = mTranslator.translate(mOriginalString);
             mKeyboardView.onDrawKeyTransOut(mTranslationString);
         });
     }
